@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, func, inspect
 from flask import Flask, jsonify
 
 # set up database engine
-engine = create_engine("sqlite:///../Resources/hawaii.sqlite")
+engine = create_engine("sqlite:///../Resources/hawaii.sqlite", connect_args={'check_same_thread': False})
 inspector = inspect(engine)
 
 # Reflect database into our classes
@@ -75,3 +75,7 @@ def stats(start=None, end=None):
         filter(Measurement.date <= end).all()
     temps = list(np.ravel(results))
     return jsonify(temps)
+
+if __name__ == '__main__':
+    app.debug = True
+    app.run()
