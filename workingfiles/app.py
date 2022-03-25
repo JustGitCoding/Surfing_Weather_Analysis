@@ -9,6 +9,8 @@ from sqlalchemy import create_engine, func, inspect
 from flask import Flask, jsonify
 
 # set up database engine
+# connect_args needed because Python is a single thread application
+## the other option is to open session = Session(engine) within each function
 engine = create_engine("sqlite:///../Resources/hawaii.sqlite", connect_args={'check_same_thread': False})
 inspector = inspect(engine)
 
@@ -30,15 +32,18 @@ app = Flask(__name__)
 @app.route('/')  ## the '/' denotes that we want to put our data at the root of our routes
 # create a function that i want in this specific route
 def welcome():
-    return ('''Welcome to the Climate Analysis API!
-    Available Routes:
-    /api/v1.0/precipitation
-    /api/v1.0/stations
-    /api/v1.0/tobs
-    /api/v1.0/temp/start/end''')
+    return ("""
+    Welcome to the Climate Analysis API!<br>
+    Available Routes:<hr>
+    <a href="/api/v1.0/precipitation">/api/v1.0/precipitation</a><br>
+    <a href="/api/v1.0/stations">/api/v1.0/stations</a><br>
+    <a href="/api/v1.0/tobs">/api/v1.0/tobs</a><br>
+    <a href="/api/v1.0/temp/start/end">/api/v1.0/temp</a><br>
+    """)
 
 @app.route('/api/v1.0/precipitation')
 def precipitation():
+
     prev_year = dt.date(2017,8,23) - dt.timedelta(days=365)
     precipitation = session.query(Measurement.date, Measurement.prcp).filter(Measurement.date >= prev_year).all()
     precip = {date: prcp for date, prcp in precipitation}
@@ -47,6 +52,7 @@ def precipitation():
 
 @app.route('/api/v1.0/stations')
 def stations():
+
     results = session.query(Station.station).all()
     stations = list(np.ravel(results)) # unravel results into a one-dimensional array and convert the array to a list
     return jsonify(stations=stations)
@@ -77,5 +83,5 @@ def stats(start=None, end=None):
     return jsonify(temps)
 
 if __name__ == '__main__':
-    app.debug = True
-    app.run()
+    # app.debug = True
+    app.run(debug=True)
